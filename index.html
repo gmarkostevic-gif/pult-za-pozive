@@ -1,0 +1,882 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pult za pozive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=JetBrains+Mono:wght@500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+
+<style>
+:root{
+  --paper:#E9ECE8;
+  --surface:#FCFCFB;
+  --surface-2:#F2F5F1;
+  --ink:#141A18;
+  --ink-2:#4A5551;
+  --ink-3:#78847E;
+  --line:#D2D9D2;
+  --line-2:#BCC5BD;
+  --shadow:0 1px 0 rgba(20,26,24,.04), 0 18px 40px -22px rgba(20,26,24,.45);
+
+  --c-ko:#2A6F97;
+  --c-tok:#0E6E5E;
+  --c-da:#2C7A44;
+  --c-okleva:#A96A06;
+  --c-ne:#A93B27;
+  --c-posle:#63549B;
+  --c-nikad:#3A423F;
+
+  --focus-ring:#0E6E5E;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#0F1412;
+    --surface:#171E1B;
+    --surface-2:#1C2521;
+    --ink:#E9EDE9;
+    --ink-2:#A4B0AA;
+    --ink-3:#77837D;
+    --line:#28322E;
+    --line-2:#3A4741;
+    --shadow:0 1px 0 rgba(0,0,0,.3), 0 24px 50px -24px rgba(0,0,0,.85);
+
+    --c-ko:#6BAFD8;
+    --c-tok:#4FC4AC;
+    --c-da:#71C68A;
+    --c-okleva:#E2AC4E;
+    --c-ne:#E9836A;
+    --c-posle:#A899E4;
+    --c-nikad:#9FADA7;
+
+    --focus-ring:#4FC4AC;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#0F1412;
+  --surface:#171E1B;
+  --surface-2:#1C2521;
+  --ink:#E9EDE9;
+  --ink-2:#A4B0AA;
+  --ink-3:#77837D;
+  --line:#28322E;
+  --line-2:#3A4741;
+  --shadow:0 1px 0 rgba(0,0,0,.3), 0 24px 50px -24px rgba(0,0,0,.85);
+
+  --c-ko:#6BAFD8;
+  --c-tok:#4FC4AC;
+  --c-da:#71C68A;
+  --c-okleva:#E2AC4E;
+  --c-ne:#E9836A;
+  --c-posle:#A899E4;
+  --c-nikad:#9FADA7;
+
+  --focus-ring:#4FC4AC;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  font-size:16px;line-height:1.5;margin:0;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 96px}
+
+/* ---------- header ---------- */
+header.top{border-bottom:1px solid var(--line);background:var(--surface)}
+.top-in{
+  max-width:1180px;margin:0 auto;padding:22px 20px 20px;
+  display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;justify-content:space-between;
+}
+h1{font-size:clamp(24px,3.4vw,34px);font-weight:800;letter-spacing:-.02em;margin:0;line-height:1.05;text-wrap:balance}
+.sub{color:var(--ink-2);font-size:14px;margin:6px 0 0;max-width:48ch}
+.top-side{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.hint{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-3);margin:0;
+}
+.theme{
+  font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--ink-2);
+  background:var(--surface-2);border:1px solid var(--line-2);border-radius:999px;padding:5px 12px;
+}
+.theme:hover{color:var(--ink)}
+.theme:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+
+/* ---------- setup ---------- */
+.box{border:1px solid var(--line);background:var(--surface-2);padding:13px 16px 15px;margin:20px 0 0}
+.box-h{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:12px}
+.box-h b{font-size:13px;font-weight:700;letter-spacing:.02em}
+.box-h span{font-size:12.5px;color:var(--ink-3);flex:1}
+summary.box-h{cursor:pointer;list-style:none;margin-bottom:0}
+summary.box-h::-webkit-details-marker{display:none}
+summary.box-h::before{
+  content:"▸";color:var(--ink-3);font-size:12px;transition:transform .15s ease;display:inline-block;
+}
+details[open] > summary.box-h::before{transform:rotate(90deg)}
+details[open] > summary.box-h{margin-bottom:12px}
+summary.box-h:focus-visible{outline:2px solid var(--focus-ring);outline-offset:3px}
+.reset{
+  font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--line-2);border-radius:999px;padding:5px 12px;
+}
+.reset:hover{color:var(--ink);border-color:var(--ink-3)}
+.reset:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.field input{
+  font:inherit;font-size:14.5px;color:var(--ink);background:var(--surface);
+  border:1px solid var(--line-2);padding:8px 10px;border-radius:3px;width:100%;
+}
+.field input:focus-visible{outline:2px solid var(--focus-ring);outline-offset:1px;border-color:transparent}
+
+/* ---------- flow strip ---------- */
+.flow{margin:28px 0 0}
+.flow-h{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 10px;
+}
+.steps{display:flex;flex-wrap:wrap;border:1px solid var(--line);background:var(--surface)}
+.step{
+  flex:1 1 150px;min-width:0;text-align:left;background:none;border:0;
+  border-right:1px solid var(--line);padding:12px 14px;cursor:pointer;font:inherit;color:var(--ink);
+  display:flex;gap:10px;align-items:baseline;transition:background .12s ease;
+}
+.step:last-child{border-right:0}
+.step:hover{background:var(--surface-2)}
+.step:focus-visible{outline:none;box-shadow:inset 0 0 0 2px var(--focus-ring)}
+.step em{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-style:normal;font-size:12px;font-weight:700;
+  color:var(--c-tok);
+}
+.step b{font-weight:600;font-size:14px;letter-spacing:-.01em}
+
+/* ---------- filters ---------- */
+.bar{
+  position:sticky;top:0;z-index:30;background:var(--paper);
+  padding:18px 0 12px;margin-top:32px;border-bottom:1px solid var(--line);
+}
+.bar-in{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.search{
+  flex:1 1 220px;min-width:180px;font:inherit;font-size:15px;color:var(--ink);
+  background:var(--surface);border:1px solid var(--line-2);border-radius:3px;padding:9px 12px;
+}
+.search:focus-visible{outline:2px solid var(--focus-ring);outline-offset:1px;border-color:transparent}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.chip{
+  font:inherit;font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer;
+  background:var(--surface);color:var(--ink-2);border:1px solid var(--line-2);
+  padding:7px 12px;border-radius:999px;display:flex;align-items:center;gap:7px;
+}
+.chip:hover{color:var(--ink)}
+.chip:focus-visible{outline:2px solid var(--focus-ring);outline-offset:1px}
+.chip i{width:8px;height:8px;border-radius:50%;background:var(--dot,var(--ink-3));display:block}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+/* ---------- sections & cards ---------- */
+.sec{margin-top:38px}
+.sec-h{display:flex;align-items:baseline;gap:12px;margin-bottom:14px}
+.sec-h h2{
+  font-size:15px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin:0;color:var(--accent);
+}
+.sec-h span{font-size:13px;color:var(--ink-3);flex:1;line-height:1.35}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:12px}
+
+.card{
+  text-align:left;font:inherit;cursor:pointer;
+  background:var(--surface);border:1px solid var(--line);border-radius:4px;
+  padding:14px 15px 15px;display:flex;flex-direction:column;gap:9px;
+  transition:transform .14s ease, box-shadow .14s ease, border-color .14s ease;
+}
+.card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--line-2)}
+.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card .tag{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--accent);font-weight:700;
+}
+.card h3{font-size:16.5px;font-weight:700;letter-spacing:-.015em;margin:0;line-height:1.25;color:var(--ink)}
+.card p{
+  margin:0;font-family:"Source Serif 4",Georgia,serif;font-size:15px;line-height:1.45;color:var(--accent);
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+}
+.card p.silent{color:var(--ink-2);font-style:italic}
+
+/* ---------- focus panel ---------- */
+.scrim{
+  position:fixed;inset:0;z-index:100;display:none;
+  background:color-mix(in srgb, var(--paper) 62%, transparent);
+  backdrop-filter:blur(7px) saturate(.7);-webkit-backdrop-filter:blur(7px) saturate(.7);
+  padding:24px;overflow-y:auto;
+}
+.scrim.open{display:block}
+.panel{
+  position:relative;width:min(640px,100%);margin:0 auto;
+  background:var(--surface);border:1px solid var(--line-2);border-radius:6px;
+  box-shadow:0 40px 80px -30px rgba(0,0,0,.55);
+  padding:26px 28px 24px;
+  animation:pop .18s cubic-bezier(.2,.9,.3,1.1);
+}
+@keyframes pop{from{opacity:0;transform:scale(.965) translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.panel{animation:none}.card{transition:none}}
+.panel .tag{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--accent);font-weight:700;
+}
+.panel h2{
+  font-size:clamp(21px,3vw,27px);font-weight:800;letter-spacing:-.02em;margin:8px 0 0;
+  line-height:1.15;text-wrap:balance;padding-right:40px;
+}
+.say{
+  margin:18px 0 0;padding:16px 18px;border-radius:4px;position:relative;
+  background:color-mix(in srgb, var(--accent) 8%, var(--surface));
+  border:1px solid color-mix(in srgb, var(--accent) 26%, transparent);
+}
+.say-h{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
+.say .lbl{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--accent);font-weight:700;
+}
+.copy{
+  font:inherit;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--line-2);border-radius:999px;padding:4px 10px;
+  white-space:nowrap;
+}
+.copy:hover{color:var(--ink);border-color:var(--ink-3)}
+.copy:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+.say q{
+  font-family:"Source Serif 4",Georgia,serif;font-size:clamp(18px,2.6vw,21px);line-height:1.42;
+  color:var(--accent);font-weight:600;quotes:none;display:block;
+}
+.say.silent{background:var(--surface-2);border-color:var(--line)}
+.say.silent q{color:var(--ink);font-style:italic;font-weight:400}
+mark{
+  background:color-mix(in srgb, var(--accent) 18%, transparent);
+  color:inherit;padding:0 4px;border-radius:2px;font-weight:700;
+}
+.note{margin:16px 0 0;display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.5;color:var(--ink-2)}
+.note b{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-3);flex:0 0 auto;padding-top:3px;
+}
+.react{margin:22px 0 0;border-top:1px solid var(--line);padding-top:16px}
+.react > span{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:10px;
+}
+.react-list{display:flex;flex-direction:column;gap:7px}
+.rbtn{
+  font:inherit;font-size:14.5px;text-align:left;cursor:pointer;width:100%;
+  background:var(--surface-2);border:1px solid var(--line);border-radius:4px;
+  padding:10px 13px;color:var(--ink);display:flex;justify-content:space-between;gap:12px;align-items:center;
+  transition:border-color .12s ease,background .12s ease;
+}
+.rbtn:hover{border-color:var(--rc,var(--line-2));background:var(--surface)}
+.rbtn:focus-visible{outline:2px solid var(--focus-ring);outline-offset:1px}
+.rbtn em{font-style:normal;font-weight:700;color:var(--rc,var(--ink-3));font-size:13px;white-space:nowrap}
+.close{
+  position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;
+  background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2);
+  font-size:17px;line-height:1;cursor:pointer;
+}
+.close:hover{color:var(--ink)}
+.close:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+.nav{
+  display:flex;justify-content:space-between;gap:10px;margin-top:18px;
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.06em;color:var(--ink-3);
+}
+.nav button{font:inherit;background:none;border:0;color:var(--ink-3);cursor:pointer;padding:4px 2px}
+.nav button:hover{color:var(--ink)}
+.nav button:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+
+.empty{padding:40px 0;color:var(--ink-3);font-size:15px}
+footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);color:var(--ink-3);font-size:13px;line-height:1.6}
+
+@media (max-width:640px){
+  .wrap{padding:0 14px 80px}
+  .top-in{padding:18px 14px 16px}
+  .top-side{align-items:flex-start}
+  .scrim{padding:0}
+  .panel{border-radius:0;border:0;min-height:100%;padding:56px 20px 32px;margin:0}
+  .step{flex:1 1 100%;border-right:0;border-bottom:1px solid var(--line)}
+  .step:last-child{border-bottom:0}
+}
+
+@media print{
+  .bar,.box,.flow,.theme,.hint,.scrim,footer{display:none !important}
+  body{background:#fff;color:#000}
+  .grid{display:block}
+  .card{break-inside:avoid;border:1px solid #bbb;margin-bottom:8px;page-break-inside:avoid}
+  .card p{-webkit-line-clamp:unset;display:block;overflow:visible}
+}
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div>
+      <h1>Pult za pozive</h1>
+      <p class="sub">Klikni karticu &mdash; dobiješ tačnu rečenicu koju izgovaraš i dugmad za ono što klijent odgovori.</p>
+    </div>
+    <div class="top-side">
+      <button class="theme" id="theme" type="button">Tema: sistemska</button>
+      <p class="hint">Esc zatvara &middot; &larr; &rarr; menja karticu</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <details class="box" id="me-box">
+    <summary class="box-h"><b>&nbsp;Ti &mdash; upisuje se jednom</b><span>Ostaje zapamćeno na ovom računaru.</span></summary>
+    <div class="fields">
+      <div class="field"><label for="f-ime">Tvoje ime</label><input id="f-ime" data-k="ime" placeholder="npr. Marko"></div>
+      <div class="field"><label for="f-firma">Tvoja firma</label><input id="f-firma" data-k="firma" placeholder="npr. Studio Markov"></div>
+      <div class="field"><label for="f-cena">Tvoja cena</label><input id="f-cena" data-k="cena" placeholder="npr. 300 &euro;"></div>
+    </div>
+  </details>
+
+  <section class="box">
+    <div class="box-h">
+      <b>Trenutni poziv</b>
+      <span>Ovo menjaš pred svaki poziv.</span>
+      <button class="reset" id="reset" type="button">Novi poziv</button>
+    </div>
+    <div class="fields">
+      <div class="field"><label for="f-klijent">Ime sagovornika</label><input id="f-klijent" data-k="klijent" placeholder="npr. Dragan"></div>
+      <div class="field"><label for="f-usluga">Čime se bavi</label><input id="f-usluga" data-k="usluga" placeholder="npr. vodoinstalater"></div>
+      <div class="field"><label for="f-grad">Grad</label><input id="f-grad" data-k="grad" placeholder="npr. Kragujevac"></div>
+      <div class="field"><label for="f-konk">Prvi na Guglu</label><input id="f-konk" data-k="konkurent" placeholder="ime konkurenta"></div>
+      <div class="field"><label for="f-dan">Dan slanja</label><input id="f-dan" data-k="dan" placeholder="npr. četvrtak"></div>
+    </div>
+  </section>
+
+  <section class="flow">
+    <p class="flow-h">Tok poziva &mdash; ovim redom, ceo poziv traje do 2 minuta</p>
+    <div class="steps" id="steps"></div>
+  </section>
+
+  <div class="bar">
+    <div class="bar-in">
+      <input class="search" id="search" type="search" placeholder="Traži: para, sajt, mejl, sezona&hellip;" aria-label="Pretraga kartica">
+      <div class="chips" id="chips"></div>
+    </div>
+  </div>
+
+  <main id="board"></main>
+
+  <footer>
+    Kad zapneš: ćuti i sačekaj da on progovori. Tišina radi za tebe, ne protiv tebe.
+  </footer>
+</div>
+
+<div class="scrim" id="scrim" role="dialog" aria-modal="true" aria-labelledby="p-title">
+  <div class="panel" id="panel"></div>
+</div>
+
+<script>
+const CATS = {
+  ko:     {ime:"Ko se javio",    boja:"var(--c-ko)",     opis:"Prvih pet sekundi — sa kim uopšte pričaš."},
+  tok:    {ime:"Tok poziva",     boja:"var(--c-tok)",    opis:"Šest koraka, ovim redom. Ovo je kičma razgovora."},
+  da:     {ime:"Kaže DA",        boja:"var(--c-da)",     opis:"Otvorio se — nemoj da pričaš previše, zatvaraj."},
+  okleva: {ime:"Okleva",         boja:"var(--c-okleva)", opis:"Nije NE. Traži konkretan termin i idi dalje."},
+  ne:     {ime:"Kaže NE",        boja:"var(--c-ne)",     opis:"Ne ubeđuj. Vrati mu pitanje i pusti ga da razmisli."},
+  posle:  {ime:"Posle poziva",   boja:"var(--c-posle)",  opis:"Ovde se posao dobija. Većina odustane baš tu."},
+  nikad:  {ime:"Nikad ne govori",boja:"var(--c-nikad)",  opis:"Rečenice koje ubijaju poziv. Nauči ih napamet."}
+};
+
+const CARDS = [
+  /* ---------------- KO SE JAVIO ---------------- */
+  {id:"ko1", cat:"ko", kad:"Javio se vlasnik", sameAs:"tok1"},
+
+  {id:"ko2", cat:"ko", kad:"Javila se radnica, nije vlasnik",
+   kaze:"Dobar dan! Ko je kod vas zadužen za sajt i reklamu? … Kako se zove, da ga tražim po imenu? A kad ga najlakše nađem?",
+   note:"Zapiši ime i sat. Sledeći put zoveš i tražiš čoveka po imenu — tad te spajaju bez pitanja.",
+   react:[{t:"Dala ime i termin", go:"ko5"},{t:"Kaže „ostavite broj, javiće se on“", go:"ko6"}]},
+
+  {id:"ko3", cat:"ko", kad:"„Sad ne mogu, zovite kasnije“",
+   kaze:"Važi — u 16 ili u 18 vam prija?",
+   note:"Uvek dva konkretna sata. Nikad „javiću se ovih dana“ — to je isto što i ne javiti se.",
+   react:[{t:"Izabrao sat", go:"posle1"},{t:"Kaže „ne znam, kako ispadne“", go:"ok4"}]},
+
+  {id:"ko4", cat:"ko", kad:"„Ko ste vi? Šta prodajete?“",
+   kaze:"Pravim sajtove lokalnim firmama. Ne prodajem vam ništa preko telefona — hoću samo da vam pokažem jednu stvar koju sam video kod vas na Guglu.",
+   note:"Odgovori kratko i mirno. Duže objašnjenje zvuči kao izgovor.",
+   react:[{t:"Kaže „dobro, recite“", go:"tok2"}]},
+
+  {id:"ko5", cat:"ko", kad:"Zoveš drugi put, tražiš po imenu",
+   kaze:"Dobar dan, tražim [klijent]. … Hvala!",
+   note:"Bez objašnjenja ko si i zašto zoveš. Zvučiš kao neko ko ga već zna — spajaju te.",
+   react:[{t:"Vlasnik se javio", go:"tok1"}]},
+
+  {id:"ko6", cat:"ko", kad:"Automatska sekretarica / niko se ne javlja",
+   kaze:"Ovde [ime] iz [firma]. Zvao sam zbog vaše vidljivosti na Guglu. Zvaću ponovo u četvrtak u 10.",
+   note:"Zapiši da si ostavio poruku i tačan termin — i stvarno zovi tada.",
+   react:[{t:"Ostavio poruku", go:"posle1"}]},
+
+  /* ---------------- TOK POZIVA ---------------- */
+  {id:"tok1", cat:"tok", step:1, kad:"Otvaranje",
+   kaze:"Dobar dan, [klijent]? Ovde [ime], zovem iz [firma]. Gledao sam vas na Guglu i imam nešto da vam pokažem. Imate minut?",
+   note:"Traženje minuta je pitanje na koje se lako kaže DA. Posle njega — pauza.",
+   react:[{t:"Kaže „imam“", go:"tok2"},{t:"Kaže „nemam vremena“", go:"ok1"},{t:"Pita „ko ste vi“", go:"ko4"}]},
+
+  {id:"tok2", cat:"tok", step:2, kad:"Ubod — pokaži mu problem",
+   kaze:"Kad neko ukuca „[usluga] [grad]“, vas nema. Prvi izlazi [konkurent]. Znači ljudi koji baš sad traže to što vi radite — zovu njega. Svaki dan, a niko vam to ne javi.",
+   note:"Reci polako. Pa ĆUTI. Prvi ko progovori posle ovoga gubi — neka to bude on.",
+   react:[{t:"Ćuti ili kaže „pa da…“", go:"tok3"},{t:"Kaže „ja već imam sajt“", go:"ne1"},{t:"Kaže „meni je Fejsbuk dovoljan“", go:"ne3"}]},
+
+  {id:"tok3", cat:"tok", step:3, kad:"Ponuda — mali korak, ne posao",
+   kaze:"Evo šta ću da uradim: napraviću vam probni sajt — vaše usluge, vaše slike — i pošaljem vam link. Pogledate na telefonu, pa tek onda odlučujete bilo šta. Bez obaveze, ništa ne plaćate.",
+   note:"„BEZ OBAVEZE“ je ključna reč celog poziva. Zbog nje nema šta da izgubi, pa nema šta ni da brani.",
+   react:[{t:"Kaže „dobro, pošaljite“", go:"tok4"},{t:"Kaže „koliko to košta“", go:"da2"},{t:"Kaže „nemam para“", go:"ne2"},{t:"Kaže „pošaljite na mejl“", go:"ok2"}]},
+
+  {id:"tok4", cat:"tok", step:4, kad:"Zatvaranje — rok",
+   kaze:"Kad vam bude gotovo — sutra uveče ili prekosutra?",
+   note:"On mora da IZABERE. To je njegova prva mala obaveza prema tebi.",
+   react:[{t:"Izabrao dan", go:"tok5"}]},
+
+  {id:"tok5", cat:"tok", step:5, kad:"Zatvaranje — kanal",
+   kaze:"Gde vam je najlakše da pošaljem — WhatsApp, Viber ili mejl?",
+   note:"Ponovi broj naglas da potvrdi, pa ga odmah zapiši u tabelu.",
+   react:[{t:"Rekao gde", go:"tok6"}]},
+
+  {id:"tok6", cat:"tok", step:6, kad:"Rastanak",
+   kaze:"Znači u [dan] dobijate link, pogledate kad stignete, i ja vas onda zovem da čujem utiske. Prijatno!",
+   note:"Najavio si sledeći poziv — sad te očekuje. Nisi više nepoznat broj.",
+   react:[{t:"Spustio si slušalicu", go:"posle1"}]},
+
+  /* ---------------- KAŽE DA ---------------- */
+  {id:"da1", cat:"da", kad:"„Dobro, pošaljite mi to“",
+   kaze:"Odlično. Onda samo da se dogovorimo kad — sutra uveče ili prekosutra?",
+   note:"Ne slavi i ne pričaj dalje o sajtu. Dobio si DA — odmah ga pretvori u termin.",
+   react:[{t:"Dalje na rok", go:"tok4"}]},
+
+  {id:"da2", cat:"da", kad:"„Koliko to košta?“ (pita rano)",
+   kaze:"Zavisi šta vam treba, i baš zato prvo pravim probni — da vidite šta dobijate. O ceni pričamo kad ga pogledate, i neće biti iznenađenja.",
+   note:"Nikad ne izgovori cenu pre nego što je video sajt. Cena bez slike uvek zvuči skupo.",
+   react:[{t:"Kaže „važi“", go:"tok4"},{t:"Insistira: „recite okvirno“", go:"da3"}]},
+
+  {id:"da3", cat:"da", kad:"Insistira na ceni pre nego što je video",
+   kaze:"Kod ovakvih firmi to ispadne oko [cena]. Ali ozbiljno — pogledajte prvo sajt, pa ako vam se ne dopadne, cena nas ne zanima.",
+   note:"Kaži broj mirno i odmah vrati priču na sajt. Ako mucaš oko cene, on čuje da je previsoka.",
+   react:[{t:"Kaže „važi, pošaljite“", go:"tok4"},{t:"Kaže „skupo mi je“", go:"ne2"}]},
+
+  {id:"da4", cat:"da", kad:"Video link i dopada mu se",
+   kaze:"Drago mi je. Onda da odradimo ozbiljno: cena je [cena], polovina unapred, gotovo za nedelju dana. Da krenem sutra?",
+   note:"Ovo je jedini trenutak u celom procesu kad se priča o parama. Reci i ćuti.",
+   react:[{t:"Pristao", go:"posle5"},{t:"Kaže „da razmislim“", go:"ok5"}]},
+
+  /* ---------------- OKLEVA ---------------- */
+  {id:"ok1", cat:"okleva", kad:"„Nemam vremena za to“",
+   kaze:"Baš zato zovem — vi se ničim ne bavite. Sve radim ja, vi samo kažete „dobar je“ ili „nije“. Sa vaše strane je minut da pogledate link.",
+   note:"On ne beži od sajta nego od posla oko sajta. Skini mu posao s leđa.",
+   react:[{t:"Popustio", go:"tok4"},{t:"I dalje odbija", go:"ok4"}]},
+
+  {id:"ok2", cat:"okleva", kad:"„Pošaljite mi na mejl pa ću videti“",
+   kaze:"Poslaću, ali ponuda na papiru vam ništa ne znači. Bolje ovako: napravim vam probnu verziju — to JESTE ponuda, samo što se vidi. Sutra uveče vam odgovara?",
+   note:"„Pošaljite na mejl“ je pristojno NE. Ne završavaj poziv bez konkretnog termina.",
+   react:[{t:"Prihvatio termin", go:"tok5"},{t:"Ipak traži samo mejl", go:"ok4"}]},
+
+  {id:"ok3", cat:"okleva", kad:"„Moram da se dogovorim sa ortakom / ženom“",
+   kaze:"Naravno. Baš zato da vam napravim probni — da imate šta da mu pokažete. Mnogo se lakše dogovarate kad se vidi, nego kad se prepričava.",
+   note:"Ne teraj ga da odlučuje sam. Daj mu alat da ubedi drugoga.",
+   react:[{t:"Prihvatio", go:"tok4"}]},
+
+  {id:"ok4", cat:"okleva", kad:"„Nazovite posle sezone / u septembru“",
+   kaze:"Važi, samo — da vam sajt do tada već radi? Guglu treba nekoliko nedelja da počne da vas prikazuje. Ako krenemo sad, u sezoni ste gore. Ako krenete u sezoni, propustili ste je.",
+   note:"Obavezno upiši datum povratnog poziva u tabelu. Bez datuma, ovaj klijent je izgubljen.",
+   react:[{t:"Predomislio se", go:"tok3"},{t:"Ostaje pri svom", go:"posle6"}]},
+
+  {id:"ok5", cat:"okleva", kad:"„Razmisliću“",
+   kaze:"Važi. Samo da znam gde stojim — šta vam je glavna dilema, vreme ili para?",
+   note:"„Razmisliću“ nije informacija. Ovim pitanjem ga teraš da imenuje pravu kočnicu — a onda na nju odgovaraš.",
+   react:[{t:"Kaže „para“", go:"ne2"},{t:"Kaže „vreme“", go:"ok1"},{t:"Ne želi da kaže", go:"posle6"}]},
+
+  /* ---------------- KAŽE NE ---------------- */
+  {id:"ne1", cat:"ne", kad:"„Već imam sajt“",
+   kaze:"Ne diram ništa što radi. Samo me zanima — koliko vam je mušterija stiglo preko njega ovog meseca? … E, baš zato. Da vam pokažem kako bi izgledao kad bi radio kako treba — ne košta ništa, samo pogledate.",
+   note:"Nikad ne napadaj njegov sajt — on ga je platio. Pitaj za brojke; brojke ga ubodu umesto tebe.",
+   react:[{t:"Kaže „pa nijedna, iskreno“", go:"tok3"},{t:"Kaže „meni je dobar takav“", go:"posle6"}]},
+
+  {id:"ne2", cat:"ne", kad:"„Nemam para“",
+   kaze:"Ne tražim ništa sada. Probni sajt je besplatan — prvo gledate, pa tek onda pričamo o parama. A jedna jedina mušterija mesečno vam to vrati.",
+   note:"Ne spuštaj cenu. Skloni cenu iz razgovora dok ne vidi šta dobija.",
+   react:[{t:"Pristao da pogleda", go:"tok4"},{t:"Ostaje pri svom", go:"posle6"}]},
+
+  {id:"ne3", cat:"ne", kad:"„Fejsbuk / Instagram mi je dovoljan“",
+   kaze:"Fejsbuk je super za ljude koji vas već znaju. Ali nov klijent ne kuca vaše ime — kuca „[usluga] [grad]“. I tu vas nema. Probni sajt vas ne košta ništa, pogledajte pa mi recite.",
+   note:"Ne poredi se sa Fejsbukom. Objasni da su to dva različita čoveka: onaj koji te zna i onaj koji te traži.",
+   react:[{t:"Zainteresovao se", go:"tok3"},{t:"Ostaje pri svom", go:"posle6"}]},
+
+  {id:"ne4", cat:"ne", kad:"„Zvali su me takvi, sve prevaranti“",
+   kaze:"Potpuno vas razumem, i baš zato radim ovako: ne dajete ništa unapred, ne potpisujete ništa. Napravim, pošaljem link, vidite svoje ime na sajtu — pa tek onda razmišljate.",
+   note:"Ne braniš se i ne ubeđuješ ga da si pošten. Pokazuješ da nema šta da izgubi.",
+   react:[{t:"Omekšao", go:"tok4"},{t:"I dalje ne veruje", go:"posle6"}]},
+
+  {id:"ne5", cat:"ne", kad:"„Prijateljev sin mi to pravi“",
+   kaze:"Super, onda ostavljamo to njemu. Ako ne krene za mesec dana — imate moj broj, javite se.",
+   note:"Nijedne loše reči o „sinu“. Posadi sumnju, izađi lepo. Ovakvi se vraćaju sami za mesec-dva.",
+   react:[{t:"Završi poziv lepo", go:"posle6"}]},
+
+  {id:"ne6", cat:"ne", kad:"Nervozan je / „ne zovite me više“",
+   kaze:"Naravno, izvinjavam se što sam smetao. Prijatno.",
+   note:"Bez ijednog argumenta. Skini ga sa liste odmah. Grad je mali i priča se.",
+   react:[]},
+
+  /* ---------------- POSLE POZIVA ---------------- */
+  {id:"posle1", cat:"posle", kad:"Odmah posle poziva — poruka za 5 minuta",
+   kaze:"Pozdrav [klijent], ovde [ime], upravo smo razgovarali. Probni sajt vam šaljem u [dan] — stiže na ovaj broj.",
+   note:"Bez slika i brošura. Poenta je samo da tvoje ime stoji u njegovom telefonu.",
+   react:[{t:"Dalje: šalješ link", go:"posle2"}]},
+
+  {id:"posle2", cat:"posle", kad:"Dan D — šalješ gotov link",
+   kaze:"Evo kako bi vas ljudi videli: [link]. Pogledajte na telefonu, prođite od vrha do dna.",
+   note:"Pošalji ujutru, ne uveče. I pošalji tačno onog dana koji si obećao.",
+   react:[{t:"Sutradan ga zoveš", go:"posle3"}]},
+
+  {id:"posle3", cat:"posle", kad:"24h kasnije — ti zoveš njega",
+   kaze:"Jeste li stigli da pogledate? Šta vam je prvo zapelo za oko?",
+   note:"Ne čekaj da se on javi — nikad se neće javiti. Zoveš TI.",
+   react:[{t:"Dopada mu se", go:"da4"},{t:"Nije ni pogledao", go:"posle4"}]},
+
+  {id:"posle4", cat:"posle", kad:"Nije stigao da pogleda",
+   kaze:"Nema problema, evo šaljem ponovo. Pogledajte do sutra u 12, pa vas zovem. Sutra u 12 ili u 18?",
+   note:"Novi konkretan termin ili ništa. Treći put bez termina — ostavi ga i idi dalje.",
+   react:[{t:"Dao termin", go:"posle3"},{t:"Opet izbegava", go:"posle6"}]},
+
+  {id:"posle5", cat:"posle", kad:"Pristao je — dogovor",
+   kaze:"Odlično. Šaljem vam sada u poruci šta mi treba: logo, slike i tekstove. Kad mi to pošaljete, za nedelju dana je gotovo.",
+   note:"Odmah traži materijal, dok je zagrejan. Svaki dan ćutanja hladi dogovor.",
+   react:[]},
+
+  {id:"posle6", cat:"posle", kad:"Rekao je NE — šta sad",
+   kaze:"Razumem, hvala na vremenu. Ostavljam vam broj — ako se predomislite, javite se. Prijatno!",
+   note:"Upiši ga u tabelu sa datumom i razlogom. Zovi ponovo za dva-tri meseca — tad je već druga situacija.",
+   react:[]},
+
+  /* ---------------- NIKAD NE GOVORI ---------------- */
+  {id:"nik1", cat:"nikad", kad:"„Izvinite što smetam…“", silent:true,
+   kaze:"Počinješ iz slabije pozicije i sam mu kažeš da si smetnja.",
+   note:"Umesto toga: „Dobar dan, imate minut?“ Mirno, kao da zoveš kolegu.",
+   react:[{t:"Kako se otvara kako treba", go:"tok1"}]},
+
+  {id:"nik2", cat:"nikad", kad:"„Da li bi vas zanimalo…“", silent:true,
+   kaze:"To je pitanje na koje je najlakše reći NE — i reći će ga.",
+   note:"Umesto toga ponudi konkretnu stvar bez obaveze: „Napraviću vam probni i poslati link.“",
+   react:[{t:"Kako se nudi kako treba", go:"tok3"}]},
+
+  {id:"nik3", cat:"nikad", kad:"WordPress, hosting, domen, SEO, responsive…", silent:true,
+   kaze:"On to ne razume, pa se povlači. Niko ne kupuje ono što ne razume.",
+   note:"Pričaj samo o jednom: ljudi vas traže na Guglu i ne nalaze vas.",
+   react:[{t:"Kako se objašnjava problem", go:"tok2"}]},
+
+  {id:"nik4", cat:"nikad", kad:"„Biću vam prvi na Guglu“", silent:true,
+   kaze:"To ne možeš da garantuješ. Ako obećaš i ne ispuniš, izgubio si i njega i njegove preporuke.",
+   note:"Obećavaj samo ono što stvarno kontrolišeš: da ćeš napraviti sajt i poslati link.",
+   react:[]},
+
+  {id:"nik5", cat:"nikad", kad:"Cena pre nego što je video sajt", silent:true,
+   kaze:"Bilo koji broj bez slike zvuči skupo. Sam sebi zatvaraš vrata.",
+   note:"Cena se izgovara tek u koraku „Video link i dopada mu se“.",
+   react:[{t:"Šta reći kad pita za cenu", go:"da2"}]},
+
+  {id:"nik6", cat:"nikad", kad:"Napad na njegov stari sajt ili na „prijateljevog sina“", silent:true,
+   kaze:"Napadaš njegovu odluku, pa on brani sebe umesto da sluša tebe.",
+   note:"Umesto ocene — pitanje o brojkama: „Koliko vam je mušterija stiglo preko njega?“",
+   react:[{t:"Kako se odgovara na „imam sajt“", go:"ne1"}]},
+
+  {id:"nik7", cat:"nikad", kad:"Pričanje preko dva minuta na prvom pozivu", silent:true,
+   kaze:"Što više pričaš, to više razloga daješ da te odbije.",
+   note:"Prvi poziv ima jedan jedini cilj: da pristane da pogleda link. Ništa više.",
+   react:[]},
+
+  {id:"nik8", cat:"nikad", kad:"Popunjavanje tišine", silent:true,
+   kaze:"Posle udarne rečenice ćuti. Ako ti nastaviš da pričaš, oslobodio si ga da odgovori.",
+   note:"Izbroj u sebi do tri posle „ubod“ rečenice. Neka on prekine tišinu.",
+   react:[{t:"Vidi udarnu rečenicu", go:"tok2"}]}
+];
+
+const byId = id => CARDS.find(c => c.id === id);
+
+/* kartice koje preuzimaju tekst druge kartice (bez dupliranja teksta) */
+CARDS.forEach(c => {
+  if(!c.sameAs) return;
+  const s = byId(c.sameAs);
+  c.kaze = s.kaze; c.note = s.note; c.silent = s.silent;
+  c.react = c.react || s.react;
+});
+
+/* ---------- polja ---------- */
+const K_JA = ["ime","firma","cena"];
+const K_POZIV = ["klijent","usluga","grad","konkurent","dan"];
+const KEYS = K_JA.concat(K_POZIV);
+const DEF = {
+  ime:"[tvoje ime]", firma:"[tvoja firma]", cena:"[cena]",
+  klijent:"[ime sagovornika]", usluga:"[usluga]", grad:"[grad]", konkurent:"[konkurent]", dan:"[dan]"
+};
+let vals = {};
+
+function load(){
+  try{ vals = JSON.parse(localStorage.getItem("pult-podaci") || "{}") || {}; }
+  catch(e){ vals = {}; }
+}
+function save(){
+  try{ localStorage.setItem("pult-podaci", JSON.stringify(vals)); }catch(e){}
+}
+
+function esc(s){
+  return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+}
+/* [kljuc] -> vrednost; nepopunjeno ostaje istaknuto */
+function fill(text){
+  return esc(text).replace(/\[([^\]]+)\]/g, (m, key) => {
+    const k = key.toLowerCase();
+    if(KEYS.includes(k)){
+      const v = (vals[k] || "").trim();
+      return v ? esc(v) : '<mark>' + esc(DEF[k]) + '</mark>';
+    }
+    return '<mark>' + esc(m) + '</mark>';
+  });
+}
+/* ista zamena, ali čist tekst — za dugme Kopiraj */
+function fillPlain(text){
+  return text.replace(/\[([^\]]+)\]/g, (m, key) => {
+    const k = key.toLowerCase();
+    if(KEYS.includes(k)){
+      const v = (vals[k] || "").trim();
+      return v || DEF[k];
+    }
+    return m;
+  });
+}
+
+/* ---------- stanje ---------- */
+let filterCat = "sve";
+let query = "";
+let visible = [];
+let openId = null;
+
+function matches(c){
+  if(filterCat !== "sve" && c.cat !== filterCat) return false;
+  if(!query) return true;
+  return (c.kad + " " + c.kaze + " " + c.note + " " + CATS[c.cat].ime).toLowerCase().includes(query);
+}
+
+function renderChips(){
+  const el = document.getElementById("chips");
+  let html = '<button class="chip" type="button" data-cat="sve" aria-pressed="'+(filterCat==="sve")+'">Sve</button>';
+  for(const [k,v] of Object.entries(CATS)){
+    html += '<button class="chip" type="button" data-cat="'+k+'" style="--dot:'+v.boja+'" aria-pressed="'+(filterCat===k)+'"><i></i>'+esc(v.ime)+'</button>';
+  }
+  el.innerHTML = html;
+  el.querySelectorAll(".chip").forEach(b=>{
+    b.addEventListener("click",()=>{ filterCat = b.dataset.cat; renderChips(); renderBoard(); });
+  });
+}
+
+function renderSteps(){
+  const el = document.getElementById("steps");
+  el.innerHTML = CARDS.filter(c=>c.step).sort((a,b)=>a.step-b.step)
+    .map(c => '<button class="step" type="button" data-id="'+c.id+'"><em>'+c.step+'</em><b>'+esc(c.kad)+'</b></button>').join("");
+  el.querySelectorAll(".step").forEach(b=> b.addEventListener("click",()=>openCard(b.dataset.id)));
+}
+
+function renderBoard(){
+  const board = document.getElementById("board");
+  visible = CARDS.filter(matches);
+  if(!visible.length){
+    board.innerHTML = '<p class="empty">Nema kartice za to. Probaj drugu reč &mdash; npr. „para“, „mejl“, „sezona“.</p>';
+    return;
+  }
+  let html = "";
+  for(const [k,v] of Object.entries(CATS)){
+    const list = visible.filter(c=>c.cat===k);
+    if(!list.length) continue;
+    html += '<section class="sec" style="--accent:'+v.boja+'">'
+          + '<div class="sec-h"><h2>'+esc(v.ime)+'</h2><span>'+esc(v.opis)+'</span></div><div class="grid">'
+          + list.map(c =>
+              '<button class="card" type="button" data-id="'+c.id+'">'
+              + '<span class="tag">'+(c.step ? "Korak "+c.step : (c.silent ? "Ne govori" : esc(v.ime)))+'</span>'
+              + '<h3>'+esc(c.kad)+'</h3>'
+              + '<p'+(c.silent?' class="silent"':'')+'>'+fill(c.kaze)+'</p></button>'
+            ).join("")
+          + '</div></section>';
+  }
+  board.innerHTML = html;
+  board.querySelectorAll(".card").forEach(b=> b.addEventListener("click",()=>openCard(b.dataset.id)));
+}
+
+/* ---------- uvećana kartica ---------- */
+const scrim = document.getElementById("scrim");
+const panel = document.getElementById("panel");
+let lastFocus = null;
+
+/* lista po kojoj idu strelice: filtrirana ako je kartica u njoj, inače sve */
+function navList(){
+  return visible.some(c=>c.id===openId) ? visible : CARDS;
+}
+
+function openCard(id){
+  const c = byId(id);
+  if(!c) return;
+  if(!scrim.classList.contains("open")) lastFocus = document.activeElement;
+  openId = id;
+  const v = CATS[c.cat];
+
+  const reacts = (c.react && c.react.length)
+    ? '<div class="react"><span>Klijent odgovori&hellip;</span><div class="react-list">'
+      + c.react.map(r=>{
+          const t = byId(r.go);
+          const col = t ? CATS[t.cat].boja : "var(--ink-3)";
+          return '<button class="rbtn" type="button" data-go="'+r.go+'" style="--rc:'+col+'"><span>'
+               + esc(r.t)+'</span><em>'+(t?esc(t.kad):"")+' &rarr;</em></button>';
+        }).join("")
+      + '</div></div>'
+    : '<div class="react"><span>Kraj poziva</span><div class="react-list">'
+      + '<button class="rbtn" type="button" data-close="1"><span>Zatvori karticu</span><em>Esc</em></button></div></div>';
+
+  panel.style.setProperty("--accent", v.boja);
+  panel.innerHTML =
+      '<button class="close" type="button" aria-label="Zatvori">&times;</button>'
+    + '<span class="tag">'+(c.step ? "Korak "+c.step+" &middot; "+esc(v.ime) : esc(v.ime))+'</span>'
+    + '<h2 id="p-title">'+esc(c.kad)+'</h2>'
+    + '<div class="say'+(c.silent?" silent":"")+'">'
+      + '<div class="say-h"><span class="lbl">'+(c.silent ? "Zašto je ovo greška" : "Ovo kažeš")+'</span>'
+      + (c.silent ? '' : '<button class="copy" type="button">Kopiraj</button>')+'</div>'
+      + '<q>'+fill(c.kaze)+'</q>'
+    + '</div>'
+    + '<p class="note"><b>Savet</b><span>'+fill(c.note)+'</span></p>'
+    + reacts
+    + '<div class="nav"><button type="button" data-nav="-1">&larr; prethodna</button><button type="button" data-nav="1">sledeća &rarr;</button></div>';
+
+  scrim.classList.add("open");
+  document.body.style.overflow = "hidden";
+
+  panel.querySelector(".close").addEventListener("click", closeCard);
+  panel.querySelectorAll("[data-go]").forEach(b=> b.addEventListener("click",()=>openCard(b.dataset.go)));
+  panel.querySelectorAll("[data-close]").forEach(b=> b.addEventListener("click", closeCard));
+  panel.querySelectorAll("[data-nav]").forEach(b=> b.addEventListener("click",()=>stepCard(+b.dataset.nav)));
+  const cp = panel.querySelector(".copy");
+  if(cp) cp.addEventListener("click",()=>copyLine(cp, fillPlain(c.kaze)));
+
+  panel.querySelector(".close").focus();
+  scrim.scrollTop = 0;
+}
+
+function copyLine(btn, text){
+  const done = ok => { btn.textContent = ok ? "Kopirano" : "Ne može"; setTimeout(()=>{ btn.textContent = "Kopiraj"; }, 1600); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>done(true), ()=>done(fallbackCopy(text)));
+  } else {
+    done(fallbackCopy(text));
+  }
+}
+function fallbackCopy(text){
+  try{
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.setAttribute("readonly","");
+    ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    return ok;
+  }catch(e){ return false; }
+}
+
+function stepCard(d){
+  const list = navList();
+  const i = list.findIndex(c=>c.id===openId);
+  const next = list[((i < 0 ? 0 : i) + d + list.length) % list.length];
+  if(next) openCard(next.id);
+}
+
+function closeCard(){
+  scrim.classList.remove("open");
+  document.body.style.overflow = "";
+  openId = null;
+  if(lastFocus && lastFocus.focus) lastFocus.focus();
+}
+
+scrim.addEventListener("mousedown", e => { if(e.target === scrim) closeCard(); });
+
+document.addEventListener("keydown", e => {
+  if(!scrim.classList.contains("open")) return;
+  if(e.key === "Escape"){ closeCard(); return; }
+  if(e.key === "ArrowRight"){ stepCard(1); return; }
+  if(e.key === "ArrowLeft"){ stepCard(-1); return; }
+  if(e.key === "Tab"){
+    /* zadrži tastaturu unutar uvećane kartice */
+    const f = panel.querySelectorAll("button");
+    if(!f.length) return;
+    const first = f[0], last = f[f.length-1];
+    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  }
+});
+
+/* ---------- polja ---------- */
+function refreshOpen(){
+  renderBoard();
+  if(openId) openCard(openId);
+}
+function wireInputs(){
+  document.querySelectorAll(".field input").forEach(inp=>{
+    const k = inp.dataset.k;
+    if(vals[k]) inp.value = vals[k];
+    inp.addEventListener("input",()=>{ vals[k] = inp.value; save(); refreshOpen(); });
+  });
+  document.getElementById("reset").addEventListener("click",()=>{
+    K_POZIV.forEach(k=>{
+      vals[k] = "";
+      const inp = document.querySelector('.field input[data-k="'+k+'"]');
+      if(inp) inp.value = "";
+    });
+    save(); refreshOpen();
+    const first = document.querySelector('.field input[data-k="klijent"]');
+    if(first) first.focus();
+  });
+  /* ako su tvoji podaci već upisani, sklopi taj deo da ne smeta */
+  const box = document.getElementById("me-box");
+  box.open = !K_JA.every(k => (vals[k]||"").trim());
+}
+
+/* ---------- tema ---------- */
+const TEME = [
+  {v:"", t:"Tema: sistemska"},
+  {v:"light", t:"Tema: svetla"},
+  {v:"dark", t:"Tema: tamna"}
+];
+function applyTheme(v){
+  if(v) document.documentElement.setAttribute("data-theme", v);
+  else document.documentElement.removeAttribute("data-theme");
+  const cur = TEME.find(t=>t.v===v) || TEME[0];
+  document.getElementById("theme").textContent = cur.t;
+  try{ localStorage.setItem("pult-tema", v); }catch(e){}
+}
+function wireTheme(){
+  let cur = "";
+  try{ cur = localStorage.getItem("pult-tema") || ""; }catch(e){}
+  applyTheme(cur);
+  document.getElementById("theme").addEventListener("click",()=>{
+    const i = TEME.findIndex(t=>t.v===cur);
+    cur = TEME[(i+1) % TEME.length].v;
+    applyTheme(cur);
+  });
+}
+
+document.getElementById("search").addEventListener("input", e => {
+  query = e.target.value.trim().toLowerCase();
+  renderBoard();
+});
+
+load();
+wireTheme();
+wireInputs();
+renderChips();
+renderSteps();
+renderBoard();
+</script>
