@@ -294,6 +294,39 @@ mark{
 .nav button:hover{color:var(--ink)}
 .nav button:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
 
+/* ---------- uređivanje teksta ---------- */
+.tools{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin:12px 2px 0;font-size:12.5px}
+.tools span{color:var(--ink-3)}
+.tools button{
+  font:inherit;font-size:12.5px;font-weight:600;background:none;border:0;padding:2px 0;cursor:pointer;
+  color:var(--ink-2);text-decoration:underline;text-underline-offset:3px;
+}
+.tools button:hover{color:var(--ink)}
+.tools button:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+.say-tools{display:flex;gap:6px;align-items:center}
+.badge{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:9.5px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line-2);border-radius:999px;padding:2px 7px;
+}
+.ed-field{display:flex;flex-direction:column;gap:5px;margin-top:16px}
+.ed-field label{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.ed-field input,.ed-field textarea{
+  font:inherit;font-size:15px;line-height:1.45;color:var(--ink);background:var(--surface-2);
+  border:1px solid var(--line-2);border-radius:4px;padding:9px 11px;width:100%;resize:vertical;
+}
+.ed-field textarea{font-family:"Source Serif 4",Georgia,serif;min-height:96px}
+.ed-field input:focus-visible,.ed-field textarea:focus-visible{outline:2px solid var(--focus-ring);outline-offset:1px;border-color:transparent}
+.ed-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.ed-actions button{
+  font:inherit;font-size:14px;font-weight:600;cursor:pointer;border-radius:4px;padding:9px 15px;
+  background:var(--surface-2);border:1px solid var(--line-2);color:var(--ink);
+}
+.ed-actions .primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.ed-actions button:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+.ed-hint{margin:16px 0 0;font-size:13px;color:var(--ink-3);line-height:1.5}
 .empty{padding:40px 0;color:var(--ink-3);font-size:15px}
 footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);color:var(--ink-3);font-size:13px;line-height:1.6}
 
@@ -354,6 +387,12 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);color:v
       <div class="field"><label for="f-dan">Dan slanja</label><input id="f-dan" data-k="dan" placeholder="npr. četvrtak"></div>
     </div>
   </section>
+
+  <div class="tools">
+    <span id="ed-count">Tekst kartica možeš da menjaš — otvori karticu i klikni „Uredi“.</span>
+    <button type="button" id="ed-copy">Kopiraj sve izmene</button>
+    <button type="button" id="ed-reset">Vrati sav tekst na original</button>
+  </div>
 
   <section class="flow">
     <p class="flow-h">Tok poziva &mdash; ovim redom, ceo poziv traje do 2 minuta</p>
@@ -654,16 +693,50 @@ function fillPlain(text){
   });
 }
 
+/* ---------- izmene teksta (uređuje ih sam pozivač) ---------- */
+let EDITS = {};
+function loadEdits(){
+  try{ EDITS = JSON.parse(localStorage.getItem("pult-izmene") || "{}") || {}; }
+  catch(e){ EDITS = {}; }
+}
+function saveEdits(){
+  try{ localStorage.setItem("pult-izmene", JSON.stringify(EDITS)); }catch(e){}
+  osveziBrojac();
+}
+/* tekst polja: izmenjen ako postoji, inače originalan */
+function txt(c, f){
+  const e = EDITS[c.id];
+  if(e && typeof e[f] === "string" && e[f].trim()) return e[f];
+  return c[f] || "";
+}
+/* tekst dugmeta reakcije */
+function rtxt(c, i){
+  const e = EDITS[c.id];
+  if(e && e.react && typeof e.react[i] === "string" && e.react[i].trim()) return e.react[i];
+  return c.react[i].t;
+}
+function izmenjena(c){ return !!EDITS[c.id]; }
+function brojIzmena(){ return Object.keys(EDITS).length; }
+function osveziBrojac(){
+  const el = document.getElementById("ed-count");
+  const n = brojIzmena();
+  el.textContent = n
+    ? "Izmenjenih kartica: " + n + "."
+    : "Tekst kartica možeš da menjaš — otvori karticu i klikni „Uredi“.";
+}
+
 /* ---------- stanje ---------- */
 let filterCat = "sve";
 let query = "";
 let visible = [];
 let openId = null;
+let editMode = false;
 
 function matches(c){
   if(filterCat !== "sve" && c.cat !== filterCat) return false;
   if(!query) return true;
-  return (c.kad + " " + c.kaze + " " + c.note + " " + CATS[c.cat].ime).toLowerCase().includes(query);
+  return (txt(c,"kad") + " " + txt(c,"kaze") + " " + txt(c,"note") + " " + CATS[c.cat].ime)
+    .toLowerCase().includes(query);
 }
 
 function renderChips(){
@@ -681,7 +754,7 @@ function renderChips(){
 function renderSteps(){
   const el = document.getElementById("steps");
   el.innerHTML = CARDS.filter(c=>c.step).sort((a,b)=>a.step-b.step)
-    .map(c => '<button class="step" type="button" data-id="'+c.id+'"><em>'+c.step+'</em><b>'+esc(c.kad)+'</b></button>').join("");
+    .map(c => '<button class="step" type="button" data-id="'+c.id+'"><em>'+c.step+'</em><b>'+esc(txt(c,"kad"))+'</b></button>').join("");
   el.querySelectorAll(".step").forEach(b=> b.addEventListener("click",()=>openCard(b.dataset.id)));
 }
 
@@ -701,8 +774,8 @@ function renderBoard(){
           + list.map(c =>
               '<button class="card" type="button" data-id="'+c.id+'">'
               + '<span class="tag">'+(c.step ? "Korak "+c.step : (c.silent ? "Ne govori" : esc(v.ime)))+'</span>'
-              + '<h3>'+esc(c.kad)+'</h3>'
-              + '<p'+(c.silent?' class="silent"':'')+'>'+fill(c.kaze)+'</p></button>'
+              + '<h3>'+esc(txt(c,"kad"))+'</h3>'
+              + '<p'+(c.silent?' class="silent"':'')+'>'+fill(txt(c,"kaze"))+'</p></button>'
             ).join("")
           + '</div></section>';
   }
@@ -715,65 +788,128 @@ const scrim = document.getElementById("scrim");
 const panel = document.getElementById("panel");
 let lastFocus = null;
 
-/* lista po kojoj idu strelice: filtrirana ako je kartica u njoj, inače sve */
 function navList(){
   return visible.some(c=>c.id===openId) ? visible : CARDS;
 }
 
-function openCard(id){
+function openCard(id, edit){
   const c = byId(id);
   if(!c) return;
   if(!scrim.classList.contains("open")) lastFocus = document.activeElement;
   openId = id;
-  const v = CATS[c.cat];
+  editMode = !!edit;
+  panel.style.setProperty("--accent", CATS[c.cat].boja);
+  if(editMode) renderEdit(c); else renderView(c);
+  scrim.classList.add("open");
+  document.body.style.overflow = "hidden";
+  scrim.scrollTop = 0;
+}
 
+function renderView(c){
+  const v = CATS[c.cat];
   const reacts = (c.react && c.react.length)
     ? '<div class="react"><span>Klijent odgovori&hellip;</span><div class="react-list">'
-      + c.react.map(r=>{
+      + c.react.map((r,i)=>{
           const t = byId(r.go);
           const col = t ? CATS[t.cat].boja : "var(--ink-3)";
           return '<button class="rbtn" type="button" data-go="'+r.go+'" style="--rc:'+col+'"><span>'
-               + esc(r.t)+'</span><em>'+(t?esc(t.kad):"")+' &rarr;</em></button>';
+               + esc(rtxt(c,i))+'</span><em>'+(t?esc(txt(t,"kad")):"")+' &rarr;</em></button>';
         }).join("")
       + '</div></div>'
     : '<div class="react"><span>Kraj poziva</span><div class="react-list">'
       + '<button class="rbtn" type="button" data-close="1"><span>Zatvori karticu</span><em>Esc</em></button></div></div>';
 
-  panel.style.setProperty("--accent", v.boja);
   panel.innerHTML =
       '<button class="close" type="button" aria-label="Zatvori">&times;</button>'
-    + '<span class="tag">'+(c.step ? "Korak "+c.step+" &middot; "+esc(v.ime) : esc(v.ime))+'</span>'
-    + '<h2 id="p-title">'+esc(c.kad)+'</h2>'
+    + '<span class="tag">'+(c.step ? "Korak "+c.step+" &middot; "+esc(v.ime) : esc(v.ime))
+      + (izmenjena(c) ? ' <span class="badge">izmenjeno</span>' : '')+'</span>'
+    + '<h2 id="p-title">'+esc(txt(c,"kad"))+'</h2>'
     + '<div class="say'+(c.silent?" silent":"")+'">'
       + '<div class="say-h"><span class="lbl">'+(c.silent ? "Zašto je ovo greška" : "Ovo kažeš")+'</span>'
-      + (c.silent ? '' : '<button class="copy" type="button">Kopiraj</button>')+'</div>'
-      + '<q>'+fill(c.kaze)+'</q>'
+      + '<span class="say-tools">'
+      + (c.silent ? '' : '<button class="copy" type="button" data-copy="1">Kopiraj</button>')
+      + '<button class="copy" type="button" data-edit="1">Uredi</button></span></div>'
+      + '<q>'+fill(txt(c,"kaze"))+'</q>'
     + '</div>'
-    + '<p class="note"><b>Savet</b><span>'+fill(c.note)+'</span></p>'
+    + '<p class="note"><b>Savet</b><span>'+fill(txt(c,"note"))+'</span></p>'
     + reacts
     + '<div class="nav"><button type="button" data-nav="-1">&larr; prethodna</button><button type="button" data-nav="1">sledeća &rarr;</button></div>';
-
-  scrim.classList.add("open");
-  document.body.style.overflow = "hidden";
 
   panel.querySelector(".close").addEventListener("click", closeCard);
   panel.querySelectorAll("[data-go]").forEach(b=> b.addEventListener("click",()=>openCard(b.dataset.go)));
   panel.querySelectorAll("[data-close]").forEach(b=> b.addEventListener("click", closeCard));
   panel.querySelectorAll("[data-nav]").forEach(b=> b.addEventListener("click",()=>stepCard(+b.dataset.nav)));
-  const cp = panel.querySelector(".copy");
-  if(cp) cp.addEventListener("click",()=>copyLine(cp, fillPlain(c.kaze)));
-
+  panel.querySelectorAll("[data-edit]").forEach(b=> b.addEventListener("click",()=>openCard(c.id,true)));
+  const cp = panel.querySelector("[data-copy]");
+  if(cp) cp.addEventListener("click",()=>copyLine(cp, fillPlain(txt(c,"kaze"))));
   panel.querySelector(".close").focus();
-  scrim.scrollTop = 0;
+}
+
+function renderEdit(c){
+  const v = CATS[c.cat];
+  const reactFields = (c.react||[]).map((r,i)=>{
+    const t = byId(r.go);
+    return '<div class="ed-field"><label for="ed-r'+i+'">Dugme '+(i+1)
+      + (t ? ' &middot; vodi na: '+esc(txt(t,"kad")) : '')+'</label>'
+      + '<input id="ed-r'+i+'" data-r="'+i+'" value="'+esc(rtxt(c,i))+'"></div>';
+  }).join("");
+
+  panel.innerHTML =
+      '<button class="close" type="button" aria-label="Zatvori">&times;</button>'
+    + '<span class="tag">Uređivanje &middot; '+esc(v.ime)+'</span>'
+    + '<h2 id="p-title">'+esc(txt(c,"kad"))+'</h2>'
+    + '<div class="ed-field"><label for="ed-kad">Naslov kartice</label>'
+      + '<input id="ed-kad" value="'+esc(txt(c,"kad"))+'"></div>'
+    + '<div class="ed-field"><label for="ed-kaze">'+(c.silent?"Zašto je ovo greška":"Rečenica koju izgovaraš")+'</label>'
+      + '<textarea id="ed-kaze">'+esc(txt(c,"kaze"))+'</textarea></div>'
+    + '<div class="ed-field"><label for="ed-note">Savet</label>'
+      + '<textarea id="ed-note" style="min-height:70px">'+esc(txt(c,"note"))+'</textarea></div>'
+    + reactFields
+    + '<p class="ed-hint">Zagrade se same popunjavaju iz polja na vrhu stranice: '
+      + '[klijent], [ime], [firma], [usluga], [grad], [konkurent], [cena], [dan]. Ostavi ih kakve jesu.</p>'
+    + '<div class="ed-actions">'
+      + '<button class="primary" type="button" data-save="1">Sačuvaj</button>'
+      + '<button type="button" data-cancel="1">Otkaži</button>'
+      + (izmenjena(c) ? '<button type="button" data-revert="1">Vrati original</button>' : '')
+    + '</div>';
+
+  panel.querySelector(".close").addEventListener("click", closeCard);
+  panel.querySelector("[data-cancel]").addEventListener("click",()=>openCard(c.id));
+  panel.querySelector("[data-save]").addEventListener("click",()=>{
+    const e = {};
+    const kad  = panel.querySelector("#ed-kad").value.trim();
+    const kaze = panel.querySelector("#ed-kaze").value.trim();
+    const note = panel.querySelector("#ed-note").value.trim();
+    if(kad  && kad  !== c.kad)  e.kad = kad;
+    if(kaze && kaze !== c.kaze) e.kaze = kaze;
+    if(note && note !== c.note) e.note = note;
+    const rs = [];
+    let imaR = false;
+    panel.querySelectorAll("[data-r]").forEach(inp=>{
+      const i = +inp.dataset.r, val = inp.value.trim();
+      if(val && val !== c.react[i].t){ rs[i] = val; imaR = true; }
+    });
+    if(imaR) e.react = rs;
+    if(Object.keys(e).length) EDITS[c.id] = e; else delete EDITS[c.id];
+    saveEdits();
+    renderSteps(); renderBoard();
+    openCard(c.id);
+  });
+  const rev = panel.querySelector("[data-revert]");
+  if(rev) rev.addEventListener("click",()=>{
+    delete EDITS[c.id];
+    saveEdits();
+    renderSteps(); renderBoard();
+    openCard(c.id);
+  });
+  panel.querySelector("#ed-kaze").focus();
 }
 
 function copyLine(btn, text){
   const done = ok => { btn.textContent = ok ? "Kopirano" : "Ne može"; setTimeout(()=>{ btn.textContent = "Kopiraj"; }, 1600); };
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(text).then(()=>done(true), ()=>done(fallbackCopy(text)));
-  } else {
-    done(fallbackCopy(text));
-  }
+  } else { done(fallbackCopy(text)); }
 }
 function fallbackCopy(text){
   try{
@@ -797,20 +933,24 @@ function stepCard(d){
 function closeCard(){
   scrim.classList.remove("open");
   document.body.style.overflow = "";
-  openId = null;
+  openId = null; editMode = false;
   if(lastFocus && lastFocus.focus) lastFocus.focus();
 }
 
-scrim.addEventListener("mousedown", e => { if(e.target === scrim) closeCard(); });
+scrim.addEventListener("mousedown", e => { if(e.target === scrim && !editMode) closeCard(); });
 
 document.addEventListener("keydown", e => {
   if(!scrim.classList.contains("open")) return;
-  if(e.key === "Escape"){ closeCard(); return; }
-  if(e.key === "ArrowRight"){ stepCard(1); return; }
-  if(e.key === "ArrowLeft"){ stepCard(-1); return; }
+  const uPolju = /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName);
+  if(e.key === "Escape"){
+    if(editMode && openId) openCard(openId);
+    else closeCard();
+    return;
+  }
+  if(!uPolju && e.key === "ArrowRight"){ stepCard(1); return; }
+  if(!uPolju && e.key === "ArrowLeft"){ stepCard(-1); return; }
   if(e.key === "Tab"){
-    /* zadrži tastaturu unutar uvećane kartice */
-    const f = panel.querySelectorAll("button");
+    const f = panel.querySelectorAll("button, input, textarea");
     if(!f.length) return;
     const first = f[0], last = f[f.length-1];
     if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
@@ -821,7 +961,7 @@ document.addEventListener("keydown", e => {
 /* ---------- polja ---------- */
 function refreshOpen(){
   renderBoard();
-  if(openId) openCard(openId);
+  if(openId && !editMode) openCard(openId);
 }
 function wireInputs(){
   document.querySelectorAll(".field input").forEach(inp=>{
@@ -839,9 +979,29 @@ function wireInputs(){
     const first = document.querySelector('.field input[data-k="klijent"]');
     if(first) first.focus();
   });
-  /* ako su tvoji podaci već upisani, sklopi taj deo da ne smeta */
   const box = document.getElementById("me-box");
   box.open = !K_JA.every(k => (vals[k]||"").trim());
+}
+
+/* ---------- alatke za izmene ---------- */
+function wireTools(){
+  const cp = document.getElementById("ed-copy");
+  cp.addEventListener("click",()=>{
+    if(!brojIzmena()){ cp.textContent = "Nema izmena"; setTimeout(()=>cp.textContent="Kopiraj sve izmene",1600); return; }
+    const t = JSON.stringify(EDITS, null, 2);
+    const done = ok => { cp.textContent = ok ? "Kopirano" : "Ne može"; setTimeout(()=>cp.textContent="Kopiraj sve izmene",1600); };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(()=>done(true), ()=>done(fallbackCopy(t)));
+    } else done(fallbackCopy(t));
+  });
+  document.getElementById("ed-reset").addEventListener("click",()=>{
+    if(!brojIzmena()) return;
+    if(!confirm("Vratiti sav tekst na original? Sve tvoje izmene se brišu.")) return;
+    EDITS = {}; saveEdits();
+    renderSteps(); renderBoard();
+    if(openId) openCard(openId);
+  });
+  osveziBrojac();
 }
 
 /* ---------- tema ---------- */
@@ -874,8 +1034,10 @@ document.getElementById("search").addEventListener("input", e => {
 });
 
 load();
+loadEdits();
 wireTheme();
 wireInputs();
+wireTools();
 renderChips();
 renderSteps();
 renderBoard();
